@@ -148,9 +148,8 @@ public class TransitiveActivity extends AppCompatActivity implements RecyclerAda
             adapter.notifyDataSetChanged();
             textView.setText("Обрано: " + uri.size());
         } else {
-            Toast.makeText(this, "Ви не обрали жодного зображення!", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(TransitiveActivity.this, MainActivity.class);
-            startActivity(intent);
+            Toast.makeText(this, "Ви не обрали жодного зображення!", Toast.LENGTH_SHORT).show();
+            onBackPressed();
         }
     }
 
@@ -163,7 +162,7 @@ public class TransitiveActivity extends AppCompatActivity implements RecyclerAda
     private void compress() throws IOException {
         // Обрання місця для зберігання
         File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-      /*  File folder = new File(downloadsDir, "GalleryZIP");
+        File folder = new File(downloadsDir, "GalleryZIP");
 
         // Перевірка, чи папка вже існує, якщо ні - створюємо її
         if (!folder.exists()) {
@@ -171,7 +170,7 @@ public class TransitiveActivity extends AppCompatActivity implements RecyclerAda
                 Toast.makeText(this, "Помилка при створенні папки", Toast.LENGTH_SHORT).show();
                 return;
             }
-        }*/
+        }
         for (int i = 0; i < uri.size(); i++) {
 
             Uri imageUri = uri.get(i);
@@ -193,7 +192,7 @@ public class TransitiveActivity extends AppCompatActivity implements RecyclerAda
                     PngImage optimizedImage = optimizer.optimize(inputImage);
 
                     String uniqueFileName = "optimized_image_" + System.currentTimeMillis() + ".png";
-                    String outputFilePath = downloadsDir.getAbsolutePath() + File.separator + uniqueFileName;
+                    String outputFilePath = folder.getAbsolutePath() + File.separator + uniqueFileName;
 
                     OutputStream output = new FileOutputStream(outputFilePath);
                     optimizedImage.writeDataOutputStream(output);
@@ -207,7 +206,7 @@ public class TransitiveActivity extends AppCompatActivity implements RecyclerAda
                 byte[] imageBytes = outputStream.toByteArray();
 
                 String uniqueFileName = "optimized_image_" + System.currentTimeMillis() + ".jpg";
-                String outputFilePath = downloadsDir.getAbsolutePath() + File.separator + uniqueFileName;
+                String outputFilePath = folder.getAbsolutePath() + File.separator + uniqueFileName;
 
                 FileOutputStream fos = new FileOutputStream(outputFilePath);
                 fos.write(imageBytes);
@@ -218,25 +217,24 @@ public class TransitiveActivity extends AppCompatActivity implements RecyclerAda
                 Toast.makeText(TransitiveActivity.this, "Деякі зображення не було опрацьовано через непідтримуваний формат", Toast.LENGTH_LONG);
             }
         }
-        showDone("Стиснення завершено!");
+        showDone("Стиснення завершено!", "Успішно збережено до: " + folder.getAbsolutePath());
 
     }
 
     private void archive() {
         File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
-/*
-        File folder = new File(downloadsDir, "GalleryZIP");
+  /*      File folder = new File(downloadsDir, "GalleryZIP");
 
         // Перевірка, чи папка вже існує, якщо ні - створюємо її
         if (!folder.exists()) {
             if (!folder.mkdirs()) {
+
                 Toast.makeText(this, "Помилка при створенні папки", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
 */
-
         String fileName = "archivedImages_" + System.currentTimeMillis() + ".zip";
         File zipFile = new File(downloadsDir, fileName);
 
@@ -249,10 +247,10 @@ public class TransitiveActivity extends AppCompatActivity implements RecyclerAda
                 String imagePath = getPathFromUri(imageUri);
 
                 // Генерування ім'я файлу + визначення розширення
-                String imageName = "image_" + System.currentTimeMillis()+"."
+                String imageName = "image_" + System.currentTimeMillis() + "."
                         + getContentResolver().getType(imageUri)
                         .substring(getContentResolver()
-                                .getType(imageUri).lastIndexOf("/")+1);
+                                .getType(imageUri).lastIndexOf("/") + 1);
 
                 // Створення нового ZIP-запису
                 zipOutputStream.putNextEntry(new ZipEntry(imageName));
@@ -272,14 +270,15 @@ public class TransitiveActivity extends AppCompatActivity implements RecyclerAda
             zipOutputStream.close();
 
             // Повідомлення користувачу про успішну архівацію
-            if (uri.size()>1)
-                showDone("Зображення успішно архівовані  в Завантаження" );//+ zipFile.getAbsolutePath())
-            else
-                showDone("Зображення успішно архівовано  в Завантаження");
+
+            showDone("Архівація виконана!", "Успішно збережено до: " + downloadsDir.getAbsolutePath());//+ zipFile.getAbsolutePath())
+
 
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, "Помилка при архівації зображень", Toast.LENGTH_SHORT).show();
+            onBackPressed();
+
         }
     }
 
@@ -320,13 +319,18 @@ public class TransitiveActivity extends AppCompatActivity implements RecyclerAda
         return extension;
     }
 
-    private void showDone(String text) {
+    private void showDone(String title, String message) {
         AlertDialog.Builder alertDlgBuilder = new AlertDialog.Builder(TransitiveActivity.this);
-        alertDlgBuilder.setTitle(text)
+        alertDlgBuilder.setTitle(title).setMessage(message)
                 .setCancelable(true)
-                .setPositiveButton("Готово", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Гаразд", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        onBackPressed();
+                    }
+                }).setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
                         onBackPressed();
                     }
                 });

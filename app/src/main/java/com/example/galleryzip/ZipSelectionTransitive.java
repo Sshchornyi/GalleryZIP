@@ -1,6 +1,7 @@
 package com.example.galleryzip;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -101,6 +102,11 @@ public class ZipSelectionTransitive extends AppCompatActivity {
 
             textView1.setText(zipFile.getName());
 
+        }else {
+            Toast.makeText(this, "Ви не обрали жодного файлу!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(ZipSelectionTransitive.this, MainActivity.class);
+            startActivity(intent);
+            onBackPressed();
         }
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -108,7 +114,7 @@ public class ZipSelectionTransitive extends AppCompatActivity {
 
     private void unzip() throws IOException {
         File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-/*        File folder = new File(downloadsDir, "GalleryZIP");
+        File folder = new File(downloadsDir, "GalleryZIP");
 
         // Перевірка, чи папка вже існує, якщо ні - створюємо її
         if (!folder.exists()) {
@@ -116,39 +122,77 @@ public class ZipSelectionTransitive extends AppCompatActivity {
                 Toast.makeText(this, "Помилка при створенні папки", Toast.LENGTH_SHORT).show();
                 return;
             }
-        }*/
-
-        byte[] buffer = new byte[1024];
-        String path = zipFile.getPath().substring(zipFile.getPath().lastIndexOf(":")+1);
-        FileInputStream inputStream = new FileInputStream(path);
-
-        ZipInputStream zis = new ZipInputStream(inputStream);
-
-        ZipEntry zipEntry = zis.getNextEntry();
-        while (zipEntry != null) {
-
-            File newFile = new File(downloadsDir, zipEntry.getName());
-
-            File parent = newFile.getParentFile();
-            if (!parent.isDirectory() && !parent.mkdirs()) {
-                throw new IOException("Failed to create directory " + parent);
-            }
-
-            // write file content
-            FileOutputStream fos = new FileOutputStream(newFile);
-            int len;
-            while ((len = zis.read(buffer)) > 0) {
-                fos.write(buffer, 0, len);
-            }
-            fos.close();
-
-
-            zipEntry = zis.getNextEntry();
         }
 
-        zis.closeEntry();
-        zis.close();
+
+        byte[] buffer = new byte[1024];
+        String path = zipFile.getPath().substring(zipFile.getPath().lastIndexOf(":") + 1);
+        FileInputStream inputStream = new FileInputStream(path);
+
+        // Cтворення окремої папки архіву
+
+        String archiveFolderName = zipFile.getName().substring(0, zipFile.getName().length() - 4);
+        File archiveFolder = new File(folder, archiveFolderName);
+        try {
+
+
+            ZipInputStream zis = new ZipInputStream(inputStream);
+
+            ZipEntry zipEntry = zis.getNextEntry();
+            while (zipEntry != null) {
+
+                File newFile = new File(archiveFolder, zipEntry.getName());
+
+                File parent = newFile.getParentFile();
+                if (!parent.isDirectory() && !parent.mkdirs()) {
+
+                    throw new IOException("Failed to create directory " + parent);
+                }
+
+                // write file content
+                FileOutputStream fos = new FileOutputStream(newFile);
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+                fos.close();
+
+
+                zipEntry = zis.getNextEntry();
+            }
+
+            zis.closeEntry();
+            zis.close();
+            showDone("Видобуто успішно!", "Успішно збережено до: " + folder.getAbsolutePath());
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+
+            Toast.makeText(this, "Помилка при розархівуванні", Toast.LENGTH_SHORT).show();
+            onBackPressed();
+        }
     }
+
+    private void showDone(String title, String message) {
+        AlertDialog.Builder alertDlgBuilder = new AlertDialog.Builder(ZipSelectionTransitive.this);
+        alertDlgBuilder.setTitle(title).setMessage(message)
+                .setCancelable(true)
+                .setPositiveButton("Гаразд", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        onBackPressed();
+                    }
+                }).setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        onBackPressed();
+                    }
+                });
+
+        AlertDialog dialog = alertDlgBuilder.create();
+        dialog.show();
+    }
+
     private void showProcess(String text) {
         AlertDialog.Builder alertDlgBuilder = new AlertDialog.Builder(ZipSelectionTransitive.this);
         alertDlgBuilder.setTitle("AlertDialog")

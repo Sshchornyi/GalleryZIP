@@ -6,4 +6,12 @@
     <color name="background_night">#271D15</color>
     <color name= "buttons_tint_night">#EADEB4</color>
     <color name="buttons_text_night">#4A3829</color>
+
+    <color name="background_light">#EADEB4</color>
+    <color name= "buttons_tint_light">#4A3829</color>
+    <color name="buttons_text_light">#FFFBEB</color>
+
+    <color name="folder_vector_image_light">#4C3D30</color>
+
+    <color name="interesting">#FBE9AB</color>
 </resources>

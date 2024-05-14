@@ -2,13 +2,23 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.GalleryZIP" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:windowBackground">@color/background_light</item>
+        <item name="android:buttonStyle">@style/ButtonsStyle</item>
+    </style>
 
+    <style name="ButtonsStyle">
+        <item name="android:textColor">@color/buttons_text_light</item>
+        <item name="backgroundTint">@color/buttons_tint_light</item>
+        <item name="android:padding">10sp</item>
     </style>
 
     <style name="BackButton">
         <item name="tint">@color/black</item>
     </style>
 
+    <style name="FolderVectorImage">
+        <item name="tint">@color/folder_vector_image_light</item>
+    </style>
     <style name="Theme.GalleryZIP" parent="Base.Theme.GalleryZIP" />
 
 </resources>
