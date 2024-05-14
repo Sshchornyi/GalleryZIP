@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">GalleryZIP</string>
+    <string name="str_decompress">Розархівувати</string>
+    <string name="str_compress">Стиснути</string>
+    <string name="str_archive">Архівувати</string>
+    <string name="str_select_action">Що будемо робити?</string>
+    <string name="selected_images">Обрано: 0</string>
+    <string name="Ok_str">Продовжити</string>
+</resources>
